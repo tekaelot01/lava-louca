@@ -1370,6 +1370,63 @@
   line-height: 1.45;
 }
 
+/* ===== BLACK NOVEMBER (promo + contagem 30 min) ===== */
+.bn-promo{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+  padding:10px 12px;
+  border-radius:10px;
+  background: var(--ink);
+  color:#fff;
+}
+.bn-title{
+  font-size:16px;
+  font-weight:800;
+  letter-spacing:.5px;
+  line-height:1.1;
+  text-transform:uppercase;
+}
+.bn-title span{ color: var(--gold); }
+.bn-sub{
+  margin-top:3px;
+  font-size:12px;
+  font-weight:600;
+  color:#cfcfcf;
+}
+.bn-timer{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  flex-shrink:0;
+}
+.bn-box{
+  min-width:38px;
+  padding:5px 4px;
+  border-radius:6px;
+  background: var(--gold);
+  color: var(--ink);
+  text-align:center;
+  font-size:18px;
+  font-weight:800;
+  font-variant-numeric: tabular-nums;
+  line-height:1;
+}
+.bn-box small{
+  display:block;
+  margin-top:2px;
+  font-size:9px;
+  font-weight:700;
+  text-transform:uppercase;
+}
+.bn-sep{
+  font-size:18px;
+  font-weight:800;
+  color: var(--gold);
+}
+
 /* ===== SINGLE PRICE (1 preço, sem variação) ===== */
 .single-price{
   padding: 12px 12px 0;
@@ -1696,6 +1753,18 @@
 
  <!-- PRICE (apenas 1 preço) -->
 <section class="single-price" aria-label="Price and delivery">
+  <!-- BLACK NOVEMBER -->
+  <div class="bn-promo" aria-label="Black November offer">
+    <div>
+      <div class="bn-title">Black <span>November</span></div>
+      <div class="bn-sub">Offer ends in</div>
+    </div>
+    <div class="bn-timer" role="timer" aria-live="off">
+      <div class="bn-box"><span id="bnMin">30</span><small>min</small></div>
+      <span class="bn-sep">:</span>
+      <div class="bn-box"><span id="bnSec">00</span><small>sec</small></div>
+    </div>
+  </div>
   <div class="price-row">
     <div class="price-left">
       <div class="main-price">
@@ -2563,4 +2632,36 @@ selectOffer(0);
 
 
 
+<script>
+// ===== Black November: contagem decrescente de 30 minutos =====
+(function(){
+  var DURATION = 30 * 60 * 1000;
+  var KEY = 'bnOfferEnd';
+  var minEl = document.getElementById('bnMin');
+  var secEl = document.getElementById('bnSec');
+  if (!minEl || !secEl) return;
+
+  function readEnd(){
+    try { return parseInt(localStorage.getItem(KEY), 10) || 0; } catch(e){ return 0; }
+  }
+  function saveEnd(v){
+    try { localStorage.setItem(KEY, String(v)); } catch(e){}
+  }
+
+  // mantém o mesmo prazo ao recarregar a página; recomeça quando chega a zero
+  var end = readEnd();
+  if (!end || end <= Date.now()) { end = Date.now() + DURATION; saveEnd(end); }
+
+  function tick(){
+    var left = end - Date.now();
+    if (left <= 0) { end = Date.now() + DURATION; saveEnd(end); left = DURATION; }
+    var total = Math.ceil(left / 1000);
+    var m = Math.floor(total / 60), s = total % 60;
+    minEl.textContent = (m < 10 ? '0' : '') + m;
+    secEl.textContent = (s < 10 ? '0' : '') + s;
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
+</script>
 </body></html>
